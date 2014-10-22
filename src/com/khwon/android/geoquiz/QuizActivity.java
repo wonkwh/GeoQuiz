@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,7 +15,8 @@ public class QuizActivity extends Activity {
 
     private Button true_button_;
     private Button false_button_;
-    private Button next_button_;
+    private ImageButton next_button_;
+    private ImageButton prev_button_;
     private TextView question_text_view_;
 
     private TrueFalse[] question_back_ = new TrueFalse[] {
@@ -37,6 +39,15 @@ public class QuizActivity extends Activity {
         question_text_view_ = (TextView)findViewById(R.id.question_text_view);
         update_Question();
 
+        //challenge::add a listener to the TextView
+        question_text_view_.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                current_index_ = (current_index_ + 1) % question_back_.length;
+                update_Question();
+            }
+        });
+
         true_button_ = (Button)findViewById(R.id.true_button);
         true_button_.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,11 +64,21 @@ public class QuizActivity extends Activity {
             }
         });
 
-        next_button_ = (Button)findViewById(R.id.next_button);
+        next_button_ = (ImageButton) findViewById(R.id.next_button);
         next_button_.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 current_index_ = (current_index_ + 1) % question_back_.length;
+                update_Question();
+            }
+        });
+
+        //challenge: add a prev button
+        prev_button_ = (ImageButton) findViewById(R.id.prev_button);
+        prev_button_.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                current_index_ = (current_index_ == 0) ? question_back_.length - 1 : current_index_ - 1;
                 update_Question();
             }
         });
@@ -71,7 +92,7 @@ public class QuizActivity extends Activity {
     private void check_Answer(boolean user_pressed_true) {
         boolean answer_is_true = question_back_[current_index_].istrue();
 
-        int message_res_id = 0;
+        int message_res_id;
         if (user_pressed_true == answer_is_true) {
             message_res_id = R.string.correct_toast;
         } else {
