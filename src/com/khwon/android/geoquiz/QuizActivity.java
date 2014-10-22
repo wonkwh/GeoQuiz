@@ -3,6 +3,7 @@ package com.khwon.android.geoquiz;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +13,9 @@ import android.widget.Toast;
 
 
 public class QuizActivity extends Activity {
+
+    private static final String TAG = "QuizActivity";
+    private static final String KEY_INDEX = "index";
 
     private Button true_button_;
     private Button false_button_;
@@ -24,20 +28,59 @@ public class QuizActivity extends Activity {
         new TrueFalse(R.string.question_mideast, false),
         new TrueFalse(R.string.question_africa, false),
         new TrueFalse(R.string.question_americas, true),
-        new TrueFalse(R.string.question_asia, true),
+        new TrueFalse(R.string.question_asia, true)
 
     };
 
     private int current_index_ = 0;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart called");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause called");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume called");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop called");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy called");
+    }
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate(Bundle) called");
+
         setContentView(R.layout.activity_quiz);
 
         //update question text view
         question_text_view_ = (TextView)findViewById(R.id.question_text_view);
+
+        //restore key index when rotate
+        if (savedInstanceState != null) {
+            current_index_ = savedInstanceState.getInt(KEY_INDEX);
+        }
         update_Question();
+
 
         //challenge::add a listener to the TextView
         question_text_view_.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +125,14 @@ public class QuizActivity extends Activity {
                 update_Question();
             }
         });
+    }
+
+    //save data across rotation
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.i(TAG, "onSaveInstaceState");
+        outState.putInt(KEY_INDEX, current_index_);
     }
 
     private void update_Question() {
