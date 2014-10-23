@@ -2,6 +2,7 @@ package com.khwon.android.geoquiz;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +22,8 @@ public class QuizActivity extends Activity {
     private Button false_button_;
     private ImageButton next_button_;
     private ImageButton prev_button_;
+    private Button cheat_button_;
+
     private TextView question_text_view_;
 
     private TrueFalse[] question_back_ = new TrueFalse[] {
@@ -33,6 +36,7 @@ public class QuizActivity extends Activity {
     };
 
     private int current_index_ = 0;
+    private boolean is_cheater_;
 
     @Override
     protected void onStart() {
@@ -107,11 +111,24 @@ public class QuizActivity extends Activity {
             }
         });
 
+        cheat_button_ = (Button)findViewById(R.id.cheat_button);
+        cheat_button_.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(QuizActivity.this, CheatActivity.class);
+                boolean answer_is_true = question_back_[current_index_].istrue();
+                i.putExtra(CheatActivity.EXTRA_ANSWER_IS_TRUE, answer_is_true);
+                //startActivity(i);
+                startActivityForResult(i, 0);
+            }
+        });
+
         next_button_ = (ImageButton) findViewById(R.id.next_button);
         next_button_.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 current_index_ = (current_index_ + 1) % question_back_.length;
+                is_cheater_ = false;
                 update_Question();
             }
         });
@@ -122,9 +139,19 @@ public class QuizActivity extends Activity {
             @Override
             public void onClick(View view) {
                 current_index_ = (current_index_ == 0) ? question_back_.length - 1 : current_index_ - 1;
+                is_cheater_ = false;
                 update_Question();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) {
+            return;
+        }
+
+        is_cheater_ = data.getBooleanExtra(CheatActivity.EXTRA_ANSWER_SHOWN, false);
     }
 
     //save data across rotation
@@ -144,11 +171,18 @@ public class QuizActivity extends Activity {
         boolean answer_is_true = question_back_[current_index_].istrue();
 
         int message_res_id;
-        if (user_pressed_true == answer_is_true) {
-            message_res_id = R.string.correct_toast;
+
+        if (is_cheater_) {
+            message_res_id = R.string.judgment_toast;
         } else {
-            message_res_id = R.string.incorrect_toast;
+
+            if (user_pressed_true == answer_is_true) {
+                message_res_id = R.string.correct_toast;
+            } else {
+                message_res_id = R.string.incorrect_toast;
+            }
         }
+
 
         Toast.makeText( this,
                 message_res_id,
